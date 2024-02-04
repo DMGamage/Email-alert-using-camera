@@ -4,6 +4,8 @@ import time
 import cv2
 from emailling  import send_email
 import os
+from threading import Thread
+
 video = cv2.VideoCapture(0)
 time.sleep(1)
 first_frame = None
@@ -51,7 +53,13 @@ while True:
     status_list.append(status)
     status_list = status_list[-2:]
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email()
+        email_thread = Thread(target=send_email,args=(image_with_object,))
+        email_thread.daemon = True
+        clean_thread = Thread(target=clean_folder())
+        clean_thread.daemon =True
+        email_thread.start()
+
+
     cv2.imshow("My test", frame)
 
 
@@ -59,4 +67,5 @@ while True:
     if key == ord('q'):
         break
 video.release()
+clean_thread.start()
 
